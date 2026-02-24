@@ -1,0 +1,89 @@
+name: Update aliae Formula
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tap
+        uses: actions/checkout@v4
+
+      - name: Get latest release from trajano/aliae
+        id: latest
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const release = await github.rest.repos.getLatestRelease({
+              owner: 'trajano',
+              repo: 'aliae'
+            });
+            const tag = release.data.tag_name;
+            const version = tag.startsWith('v') ? tag.slice(1) : tag;
+            core.setOutput('tag', tag);
+            core.setOutput('version', version);
+
+      - name: Generate formula if version changed
+        id: generate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag='${{ steps.latest.outputs.tag }}'
+          version='${{ steps.latest.outputs.version }}'
+          formula='Formula/aliae.rb'
+
+          current_version=''
+          if [[ -f "$formula" ]]; then
+            current_version=$(sed -n 's/^  version "\(.*\)"$/\1/p' "$formula")
+          fi
+
+          if [[ "$current_version" == "$version" ]]; then
+            echo "Formula already at $version"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          archive_url="https://github.com/trajano/aliae/archive/${tag}.tar.gz"
+          archive_sha=$(curl -fsSL "$archive_url" | shasum -a 256 | awk '{print $1}')
+
+          cat > "$formula" <<FORMULA
+          class Aliae < Formula
+            desc "Cross shell and platform alias management"
+            homepage "https://aliae.dev"
+            url "$archive_url"
+            head "https://github.com/trajano/aliae.git", branch: "master"
+            sha256 "$archive_sha"
+            license "MIT"
+            version "$version"
+
+            depends_on "go" => :build
+
+            def install
+              Dir.chdir("src") do
+                ENV["GOPROXY"] = ENV.key?("HOMEBREW_GOPROXY") ? ENV["HOMEBREW_GOPROXY"] : ""
+                system "go", "build", "-o=aliae", "-ldflags=-s -w -X main.Version=#{version}"
+                bin.install "aliae"
+              end
+            end
+
+            test do
+              system "#{bin}/aliae", "--help"
+            end
+          end
+          FORMULA
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit formula update
+        if: steps.generate.outputs.changed == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'feat: bump aliae formula to ${{ steps.latest.outputs.tag }}'
+          file_pattern: Formula/aliae.rb
