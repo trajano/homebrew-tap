@@ -1,9 +1,10 @@
 name: Update aliae Formula
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: "*/30 * * * *"
+  repository_dispatch:
+    types: [aliae_release_published]
 
 permissions:
   contents: write
