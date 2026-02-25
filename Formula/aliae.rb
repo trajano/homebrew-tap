@@ -2,26 +2,26 @@ class Aliae < Formula
   desc "Cross shell and platform alias management"
   homepage "https://aliae.dev"
   license "MIT"
-  version "1.5.0"
+  version "1.6.0"
   head "https://github.com/trajano/aliae.git", branch: "master"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/trajano/aliae/releases/download/v1.5.0/aliae-darwin-arm64"
-      sha256 "822b5260aad16a1fea470a50c1b2e6bddbc378fd7a4303a3925a41b0c902a50e"
+      url "https://github.com/trajano/aliae/releases/download/v1.6.0/aliae-darwin-arm64"
+      sha256 "2034694fe82fe8928a845d49be78d6afba3f271fe8e36a2b2d31b06ea94a7efa"
     else
-      url "https://github.com/trajano/aliae/releases/download/v1.5.0/aliae-darwin-amd64"
-      sha256 "16b93284c205e0f446a6d9ca97ed126e6fb99f5ca76254169ef56acfb69edb6f"
+      url "https://github.com/trajano/aliae/releases/download/v1.6.0/aliae-darwin-amd64"
+      sha256 "6541c8a229e4cabf41eba2cdb79292abdbc13a75d58a537dc6f01ecaf5cf9c05"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/trajano/aliae/releases/download/v1.5.0/aliae-linux-arm64"
-      sha256 "5776edfbd3f0ed45bd2e896c61b32be74856658e70e34f1e8ea32932138f814d"
+      url "https://github.com/trajano/aliae/releases/download/v1.6.0/aliae-linux-arm64"
+      sha256 "9e635518afc006c6f7e2c5297e74914fed05605e067683e009f254d9eb03add3"
     else
-      url "https://github.com/trajano/aliae/releases/download/v1.5.0/aliae-linux-amd64"
-      sha256 "96e813080a15e8a9bbfa049701594d03510161b1d3c3feaa1df35eeb0ed80bfa"
+      url "https://github.com/trajano/aliae/releases/download/v1.6.0/aliae-linux-amd64"
+      sha256 "24da2b9106ec412d43996f4f2041e060d0e871f67d2ff7bea42baf4183563b81"
     end
   end
 
