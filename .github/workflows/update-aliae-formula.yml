@@ -167,11 +167,6 @@ EOF
 )
           fi
 
-          go_dependency=''
-          if [[ "$needs_go" == 'true' ]]; then
-            go_dependency='    depends_on "go" => :build'
-          fi
-
           cat > "$formula" <<FORMULA
           class Aliae < Formula
             desc "Cross shell and platform alias management"
@@ -179,28 +174,27 @@ EOF
             license "MIT"
             version "$version"
             head "https://github.com/trajano/aliae.git", branch: "master"
-            if ENV["HOMEBREW_BUILD_FROM_SOURCE"] == "1"
+            depends_on "go" => :build
+
+            on_macos do
+              if Hardware::CPU.arm?
+${darwin_arm64_stanza}
+              else
+${darwin_amd64_stanza}
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.arm?
+${linux_arm64_stanza}
+              else
+${linux_amd64_stanza}
+              end
+            end
+
+            resource "source" do
               url "$source_url"
               sha256 "$source_sha"
-              depends_on "go" => :build
-            else
-$go_dependency
-
-              on_macos do
-                if Hardware::CPU.arm?
-${darwin_arm64_stanza}
-                else
-${darwin_amd64_stanza}
-                end
-              end
-
-              on_linux do
-                if Hardware::CPU.arm?
-${linux_arm64_stanza}
-                else
-${linux_amd64_stanza}
-                end
-              end
             end
 
             def install
@@ -215,13 +209,17 @@ ${linux_amd64_stanza}
               end
 
               odie "Unsupported platform" if arch.nil?
-              build_from_source = ENV["HOMEBREW_BUILD_FROM_SOURCE"] == "1"
 
               artifact = "aliae-#{arch}"
-              if !build_from_source && File.exist?(artifact)
+              if build.bottle? && File.exist?(artifact)
                 bin.install artifact => "aliae"
               else
-                cd "src" do
+                source_root = buildpath
+                unless (source_root/"src").directory?
+                  source_root = buildpath/"_source"
+                  resource("source").stage source_root
+                end
+                cd source_root/"src" do
                   system Formula["go"].opt_bin/"go", "build", *std_go_args(ldflags: "-s -w -X main.Version=#{version}")
                 end
               end
