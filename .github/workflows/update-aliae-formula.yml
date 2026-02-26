@@ -43,18 +43,21 @@ jobs:
             });
 
             const byName = new Map(release.data.assets.map(a => [a.name, a.browser_download_url]));
-            const required = {
+            const sourceUrl = `https://github.com/trajano/aliae/archive/refs/tags/${tag}.tar.gz`;
+            core.setOutput('source_url', sourceUrl);
+
+            const assets = {
               darwin_amd64_url: 'aliae-darwin-amd64',
               darwin_arm64_url: 'aliae-darwin-arm64',
               linux_amd64_url: 'aliae-linux-amd64',
               linux_arm64_url: 'aliae-linux-arm64'
             };
 
-            for (const [out, name] of Object.entries(required)) {
+            for (const [out, name] of Object.entries(assets)) {
               const url = byName.get(name);
               if (!url) {
-                core.setFailed(`Missing required release asset: ${name}`);
-                return;
+                core.warning(`Missing release asset: ${name}; formula will fall back to source build for that platform.`);
+                continue;
               }
               core.setOutput(out, url);
             }
@@ -84,11 +87,90 @@ jobs:
           darwin_arm64_url='${{ steps.assets.outputs.darwin_arm64_url }}'
           linux_amd64_url='${{ steps.assets.outputs.linux_amd64_url }}'
           linux_arm64_url='${{ steps.assets.outputs.linux_arm64_url }}'
+          source_url='${{ steps.assets.outputs.source_url }}'
 
-          darwin_amd64_sha=$(curl -fsSL "$darwin_amd64_url" | shasum -a 256 | awk '{print $1}')
-          darwin_arm64_sha=$(curl -fsSL "$darwin_arm64_url" | shasum -a 256 | awk '{print $1}')
-          linux_amd64_sha=$(curl -fsSL "$linux_amd64_url" | shasum -a 256 | awk '{print $1}')
-          linux_arm64_sha=$(curl -fsSL "$linux_arm64_url" | shasum -a 256 | awk '{print $1}')
+          sha256_url() {
+            local url="$1"
+            curl -fsSL "$url" | shasum -a 256 | awk '{print $1}'
+          }
+
+          darwin_amd64_sha=''
+          darwin_arm64_sha=''
+          linux_amd64_sha=''
+          linux_arm64_sha=''
+          source_sha=$(sha256_url "$source_url")
+
+          [[ -n "$darwin_amd64_url" ]] && darwin_amd64_sha=$(sha256_url "$darwin_amd64_url")
+          [[ -n "$darwin_arm64_url" ]] && darwin_arm64_sha=$(sha256_url "$darwin_arm64_url")
+          [[ -n "$linux_amd64_url" ]] && linux_amd64_sha=$(sha256_url "$linux_amd64_url")
+          [[ -n "$linux_arm64_url" ]] && linux_arm64_sha=$(sha256_url "$linux_arm64_url")
+
+          needs_go='false'
+
+          if [[ -n "$darwin_arm64_url" ]]; then
+            darwin_arm64_stanza=$(cat <<EOF
+                url "$darwin_arm64_url"
+                sha256 "$darwin_arm64_sha"
+EOF
+)
+          else
+            needs_go='true'
+            darwin_arm64_stanza=$(cat <<EOF
+                url "$source_url"
+                sha256 "$source_sha"
+EOF
+)
+          fi
+
+          if [[ -n "$darwin_amd64_url" ]]; then
+            darwin_amd64_stanza=$(cat <<EOF
+                url "$darwin_amd64_url"
+                sha256 "$darwin_amd64_sha"
+EOF
+)
+          else
+            needs_go='true'
+            darwin_amd64_stanza=$(cat <<EOF
+                url "$source_url"
+                sha256 "$source_sha"
+EOF
+)
+          fi
+
+          if [[ -n "$linux_arm64_url" ]]; then
+            linux_arm64_stanza=$(cat <<EOF
+                url "$linux_arm64_url"
+                sha256 "$linux_arm64_sha"
+EOF
+)
+          else
+            needs_go='true'
+            linux_arm64_stanza=$(cat <<EOF
+                url "$source_url"
+                sha256 "$source_sha"
+EOF
+)
+          fi
+
+          if [[ -n "$linux_amd64_url" ]]; then
+            linux_amd64_stanza=$(cat <<EOF
+                url "$linux_amd64_url"
+                sha256 "$linux_amd64_sha"
+EOF
+)
+          else
+            needs_go='true'
+            linux_amd64_stanza=$(cat <<EOF
+                url "$source_url"
+                sha256 "$source_sha"
+EOF
+)
+          fi
+
+          go_dependency=''
+          if [[ "$needs_go" == 'true' ]]; then
+            go_dependency='  depends_on "go" => :build'
+          fi
 
           cat > "$formula" <<FORMULA
           class Aliae < Formula
@@ -97,24 +179,21 @@ jobs:
             license "MIT"
             version "$version"
             head "https://github.com/trajano/aliae.git", branch: "master"
+$go_dependency
 
             on_macos do
               if Hardware::CPU.arm?
-                url "$darwin_arm64_url"
-                sha256 "$darwin_arm64_sha"
+${darwin_arm64_stanza}
               else
-                url "$darwin_amd64_url"
-                sha256 "$darwin_amd64_sha"
+${darwin_amd64_stanza}
               end
             end
 
             on_linux do
               if Hardware::CPU.arm?
-                url "$linux_arm64_url"
-                sha256 "$linux_arm64_sha"
+${linux_arm64_stanza}
               else
-                url "$linux_amd64_url"
-                sha256 "$linux_amd64_sha"
+${linux_amd64_stanza}
               end
             end
 
@@ -131,7 +210,14 @@ jobs:
 
               odie "Unsupported platform" if arch.nil?
 
-              bin.install "aliae-#{arch}" => "aliae"
+              artifact = "aliae-#{arch}"
+              if File.exist?(artifact)
+                bin.install artifact => "aliae"
+              else
+                cd "src" do
+                  system Formula["go"].opt_bin/"go", "build", *std_go_args(ldflags: "-s -w -X main.Version=#{version}")
+                end
+              end
             end
 
             test do
