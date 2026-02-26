@@ -169,7 +169,7 @@ EOF
 
           go_dependency=''
           if [[ "$needs_go" == 'true' ]]; then
-            go_dependency='  depends_on "go" => :build'
+            go_dependency='    depends_on "go" => :build'
           fi
 
           cat > "$formula" <<FORMULA
@@ -179,21 +179,27 @@ EOF
             license "MIT"
             version "$version"
             head "https://github.com/trajano/aliae.git", branch: "master"
+            if ENV["HOMEBREW_BUILD_FROM_SOURCE"] == "1"
+              url "$source_url"
+              sha256 "$source_sha"
+              depends_on "go" => :build
+            else
 $go_dependency
 
-            on_macos do
-              if Hardware::CPU.arm?
+              on_macos do
+                if Hardware::CPU.arm?
 ${darwin_arm64_stanza}
-              else
+                else
 ${darwin_amd64_stanza}
+                end
               end
-            end
 
-            on_linux do
-              if Hardware::CPU.arm?
+              on_linux do
+                if Hardware::CPU.arm?
 ${linux_arm64_stanza}
-              else
+                else
 ${linux_amd64_stanza}
+                end
               end
             end
 
@@ -209,9 +215,10 @@ ${linux_amd64_stanza}
               end
 
               odie "Unsupported platform" if arch.nil?
+              build_from_source = ENV["HOMEBREW_BUILD_FROM_SOURCE"] == "1"
 
               artifact = "aliae-#{arch}"
-              if File.exist?(artifact)
+              if !build_from_source && File.exist?(artifact)
                 bin.install artifact => "aliae"
               else
                 cd "src" do
