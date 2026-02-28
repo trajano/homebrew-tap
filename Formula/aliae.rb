@@ -2,33 +2,33 @@ class Aliae < Formula
   desc "Cross shell and platform alias management"
   homepage "https://aliae.dev"
   license "MIT"
-  version "1.15.0"
+  version "1.16.0"
   head "https://github.com/trajano/aliae.git", branch: "master"
   depends_on "go" => :build
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/trajano/aliae/releases/download/v1.15.0/aliae-darwin-arm64"
-      sha256 "21dc865977741bed99ab727026d5e1d75544b9b2d5273b6f3e06836b585629c4"
+      url "https://github.com/trajano/aliae/releases/download/v1.16.0/aliae-darwin-arm64"
+      sha256 "548356e0f99398a929af3708ab67749c02ff3d6cd71dac0d130dfa800076e0d1"
     else
-      url "https://github.com/trajano/aliae/releases/download/v1.15.0/aliae-darwin-amd64"
-      sha256 "b2a7dd335759e93a3d4e0216880dd3eb60f127a3a6d9cdd9eed85edc9854f9b3"
+      url "https://github.com/trajano/aliae/releases/download/v1.16.0/aliae-darwin-amd64"
+      sha256 "cef7b1fdde5366f891c5b16a200d51dfdb02f5261c569d5bfbca7c0e2170f770"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/trajano/aliae/releases/download/v1.15.0/aliae-linux-arm64"
-      sha256 "1865260d76a09e802bfe7c003743a9e10256b2cda0c2c7846dd0f1fc043de6c0"
+      url "https://github.com/trajano/aliae/releases/download/v1.16.0/aliae-linux-arm64"
+      sha256 "5d8879fcefde05890a9064b0b48f409fb9032ed9f84c160b91fd68cc093b6e3d"
     else
-      url "https://github.com/trajano/aliae/releases/download/v1.15.0/aliae-linux-amd64"
-      sha256 "b63f71789705990ad5b5648963a4cb9f5ec5d6b6d60185ded135e0f251bfce40"
+      url "https://github.com/trajano/aliae/releases/download/v1.16.0/aliae-linux-amd64"
+      sha256 "7f2e728e89796e224fdbb00154d9091a59834547b193c00598d6fbdc43f647cd"
     end
   end
 
   resource "source" do
-    url "https://github.com/trajano/aliae/archive/refs/tags/v1.15.0.tar.gz"
-    sha256 "0909fef7ad68c9fecb1d2a51297813813230147b45e05edb24938732fe8620ea"
+    url "https://github.com/trajano/aliae/archive/refs/tags/v1.16.0.tar.gz"
+    sha256 "5c74f4378726693aeaed7f46b7803b97b26027dbb970d696bcbff3a4e4499d4a"
   end
 
   def install
