@@ -2,33 +2,33 @@ class Aliae < Formula
   desc "Cross shell and platform alias management"
   homepage "https://aliae.dev"
   license "MIT"
-  version "2.2.0"
+  version "2.2.1"
   head "https://github.com/trajano/aliae.git", branch: "master"
   depends_on "go" => :build
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/trajano/aliae/releases/download/v2.2.0/aliae-darwin-arm64"
-      sha256 "51200c60fbcca08502133d0d718f5ab543a7eab089ff20352709743e218d488c"
+      url "https://github.com/trajano/aliae/releases/download/v2.2.1/aliae-darwin-arm64"
+      sha256 "806ef652186ee8ce6443543b423b9f8dd045fc367f1acb81f7e87c4e0ed13e95"
     else
-      url "https://github.com/trajano/aliae/releases/download/v2.2.0/aliae-darwin-amd64"
-      sha256 "d9bb3b52e90ea036cf5e30c2a00a8b6c22c120044bf20de9137a65ee45d12db8"
+      url "https://github.com/trajano/aliae/releases/download/v2.2.1/aliae-darwin-amd64"
+      sha256 "e487fbe80c61843ace05003bfa1660d4b03f161627cd6bd52a81dcf531dc4dc4"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/trajano/aliae/releases/download/v2.2.0/aliae-linux-arm64"
-      sha256 "a4dce6e50f511e10ce0465afb68288e2f3b91317fbeb75c4f339571228d6ea48"
+      url "https://github.com/trajano/aliae/releases/download/v2.2.1/aliae-linux-arm64"
+      sha256 "8dc743eb7d881cc71f98e717f9fe5a082e9a54f39d1682c006f3244d2e201fc8"
     else
-      url "https://github.com/trajano/aliae/releases/download/v2.2.0/aliae-linux-amd64"
-      sha256 "6097f8b6b779e66705d84b4cd780853b424939d3fe4f3cde9aa09ee9ff9ebce1"
+      url "https://github.com/trajano/aliae/releases/download/v2.2.1/aliae-linux-amd64"
+      sha256 "f3f0b6e430a799341150c04996ec9aad492a6cc566d2ce75f2159a4477c7ab43"
     end
   end
 
   resource "source" do
-    url "https://github.com/trajano/aliae/archive/refs/tags/v2.2.0.tar.gz"
-    sha256 "b02d6b27dfbb391b333a983f3245253bcbfd5231cb49e5f21e2446d84014fc65"
+    url "https://github.com/trajano/aliae/archive/refs/tags/v2.2.1.tar.gz"
+    sha256 "e3405d929f73479953659df2758eb59cbe970d1deb709943b392d3163741b854"
   end
 
   def install
