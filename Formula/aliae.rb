@@ -2,33 +2,33 @@ class Aliae < Formula
   desc "Cross shell and platform alias management"
   homepage "https://aliae.dev"
   license "MIT"
-  version "1.18.4"
+  version "2.2.0"
   head "https://github.com/trajano/aliae.git", branch: "master"
   depends_on "go" => :build
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/trajano/aliae/releases/download/v1.18.4/aliae-darwin-arm64"
-      sha256 "ca357e33bbfc6105ef2823c7d1447500b2f157821136a3dee1577f1a32e89f0c"
+      url "https://github.com/trajano/aliae/releases/download/v2.2.0/aliae-darwin-arm64"
+      sha256 "51200c60fbcca08502133d0d718f5ab543a7eab089ff20352709743e218d488c"
     else
-      url "https://github.com/trajano/aliae/releases/download/v1.18.4/aliae-darwin-amd64"
-      sha256 "787684268ffca3ecc6a02b0ae3c73a85afec5c49c99765507ca61daf882b0fbf"
+      url "https://github.com/trajano/aliae/releases/download/v2.2.0/aliae-darwin-amd64"
+      sha256 "d9bb3b52e90ea036cf5e30c2a00a8b6c22c120044bf20de9137a65ee45d12db8"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/trajano/aliae/releases/download/v1.18.4/aliae-linux-arm64"
-      sha256 "98ecf08aa35e2d049fc175f6cee935fce2e56eb48915b24264b93a6c55e15be0"
+      url "https://github.com/trajano/aliae/releases/download/v2.2.0/aliae-linux-arm64"
+      sha256 "a4dce6e50f511e10ce0465afb68288e2f3b91317fbeb75c4f339571228d6ea48"
     else
-      url "https://github.com/trajano/aliae/releases/download/v1.18.4/aliae-linux-amd64"
-      sha256 "019a40071ab4637a0f8f01343f3aa60b5eaa97dc96c6410d390ff7d029c4494b"
+      url "https://github.com/trajano/aliae/releases/download/v2.2.0/aliae-linux-amd64"
+      sha256 "6097f8b6b779e66705d84b4cd780853b424939d3fe4f3cde9aa09ee9ff9ebce1"
     end
   end
 
   resource "source" do
-    url "https://github.com/trajano/aliae/archive/refs/tags/v1.18.4.tar.gz"
-    sha256 "7f26c2d957e52ba4aad80e213f42a26a152e3402649578c2a389a9cd3c5c65ef"
+    url "https://github.com/trajano/aliae/archive/refs/tags/v2.2.0.tar.gz"
+    sha256 "b02d6b27dfbb391b333a983f3245253bcbfd5231cb49e5f21e2446d84014fc65"
   end
 
   def install
